@@ -49,7 +49,7 @@ class Client {
             let destination = `${process.env.NAS}/${name}`
             fs.copyFile(path, destination, err => {
                 if (err) return rej(err)
-                this.api('/new-file', 'post', { stats, name, type, path: absolute(destination, true), title }).then(result => res(result)).catch(e => rej(e))
+                res(true)
             })
         })
     }
@@ -60,8 +60,7 @@ class Client {
                 let { path, name } = file
                 if (!path) return rej('File is not local.')
                 let f = destination + name
-                fs.copyFile(resolve(path), f, err => {
-                    if (err) return rej(err)
+                fs.copyFile(path, f, err => {
                     return res(f)
                 })
             }).catch(e => rej(e))
@@ -92,7 +91,6 @@ class Client {
                     'Authorization': `Basic ${Buffer.from(`${process.env.USERNAME}:${process.env.APPID}`).toString('base64')}`,
                 }
             }
-            console.log(options, data)
             let req = https.request(options, resp => {
                 resp.on('data', l => d += l)
                 resp.on('end', () => {
@@ -106,7 +104,6 @@ class Client {
                 })
             })
             req.on('error', e => rej(e))
-
             if (method && method !== 'GET') req.write(typeof data === 'object' ? JSON.stringify(data) : data)
             req.end()
         })
@@ -119,7 +116,7 @@ class Client {
         return new Promise((res, rej) => {
             request(link, (err, response, data) => {
                 if (err) return rej(err)
-                res(true)
+                res(res)
             }).pipe(fs.createWriteStream(destination))
         })
     }
@@ -127,7 +124,6 @@ class Client {
         return new Promise((res, rej) => {
             if (!_id) return rej('MISSING ID')
             this.api('/check-id', 'post', { _id }).then(result => {
-                console.log(result)
                 if (result.error) return rej(result.message || JSON.stringify(result))
                 return res(result.username)
             }).catch(e => { console.log("FAILED"); return rej(e) })
@@ -178,20 +174,12 @@ class Client {
                     }
                     break
                 }
-                case 'new file': {
-                    if (!fs.existsSync('./recentlyadded')) fs.mkdirSync('./recentlyadded')
+                case 'save file': {
                     let link = data.link
                     if (!link) return console.log('No link for download')
-                    let destination = await (data.title ? (async () => {
-                        await Title.findOne({ _id: data.title }).then(result => {
-                            Directory.findOne({ _id: result.directory }).then(result => {
-                                return result.path
-                            }).catch(e => console.log(e))
-                        }).catch(e => console.log(e))
-                    })() : './recentlyadded/' + data.name)
-                    this.getFile(link, destination).then(result => {
-                        console.log(result)
-                    }).catch(e => console.log(e))
+                    if (!fs.existsSync(cPath('./recentlyadded'))) fs.mkdirSync(cPath('./recentlyadded'))
+                    let destination = p.join(cPath('./recentlyadded'), `${new Date.toISOString()}.${p.basename(link)}`)
+                    this.getFile(link, destination).catch(e => console.log(e))
                     break
                 }
                 case 'auth': {
@@ -285,14 +273,12 @@ ipcMain.handle('selectDir', async (e, args) => {
     let r = await dialog.showOpenDialog(mainWindow, {
         properties: ['openDirectory']
     })
-    console.log(r)
     return r.filePaths
 })
 ipcMain.handle('selectFile', async (e, args) => {
     let r = await dialog.showOpenDialog(mainWindow, {
         properties: ['openFile', 'multiSelections']
     })
-    console.log(r)
     return r
 })
 ipcMain.handle('appID', (e, args) => {
