@@ -1,0 +1,66 @@
+@@ -0,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enter Your AppID</title>
+    <style>
+        * {
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            width: 100%;
+            max-width: 100%;
+        }
+        .b1 {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            max-width: 100%;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="b1">
+        <h1>Enter Your App ID</h1>
+        <form id="form">
+            <span class="warn"></span>
+            <input type="text" name="appID" placeholder="PLEASE ENTER YOUR APP ID">
+            <button type="submit">SUBMIT</button>
+        </form>
+    </div>
+    <script>
+        window.handleID = id => {
+            if (!window.DESKTOP) throw new Error('ISSUE FINDING DESKTOP FEATURES')
+            window.DESKTOP.addAppID(id).catch(e => {
+                throw new Error(e)
+            })
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelector('#form').addEventListener('submit',  e => {
+                e.preventDefault()
+                e.stopPropagation()
+                let form = e.target
+                let warn = form.querySelector('.warn')
+                let warning = e => warn.innerHTML = e.message ? e.message : e
+                let id = form['appID'].value
+                if (!id) return warning('Missing ID')
+                try {
+                    window.handleID(id)
+                } catch(e) {
+                    warning(e)
+                }
+            })
+        })
+    </script>
+</body>
+</html>

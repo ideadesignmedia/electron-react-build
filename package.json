@@ -1,0 +1,80 @@
+{
+  "devDependencies": {
+    "electron": "13.2.1",
+    "electron-builder": "^22.11.7",
+    "electron-packager": "^15.4.0"
+  },
+  "scripts": {
+    "react": "cd react-app && yarn start",
+    "www": "cd react-app && yarn build && mv build ../www",
+    "start": "electron --trace-warnings index.js",
+    "postinistall": "electron-builder install-app-deps",
+    "dist": "cd react-app && yarn build && cp -R build ../build && cd .. && electron-builder",
+    "build": "cd react-app && yarn build && cp -R build ../build && cd .. && yarn electron-packager . --overwrite -out=releases"
+  },
+  "homepage": "./",
+  "name": "com.domain.sub",
+  "version": "1.0.0",
+  "author": "Idea Design Media",
+  "license": "MIT",
+  "description": "Default Electron React-App",
+  "dependencies": {
+    "ws": "^8.2.0"
+  },
+  "build": {
+    "files": [
+      "node_modules",
+      "index.js"
+    ],
+    "extraResources": [
+      {
+        "from": "app",
+        "to": "app",
+        "filter": ["**/*"]
+      },
+      {
+        "from": "build",
+        "to": "build",
+        "filter": ["**/*"]
+      }
+    ],
+    "extends": null,
+    "appId": "com.deliveryminds.cloud",
+    "productName": "Delivery Minds Cloud",
+    "directories": {
+      "output": "compiled"
+    },
+    "mac": {
+      "category": "public.app-category.business",
+      "target": "dmg"
+    },
+    "dmg": {
+      "background": null,
+      "backgroundColor": "#ffffff",
+      "window": {
+        "width": "400",
+        "height": "300"
+      },
+      "contents": [
+        {
+          "x": 100,
+          "y": 100
+        },
+        {
+          "x": 300,
+          "y": 100,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "win": {
+      "target": "nsis",
+      "publisherName": "Idea Design Media"
+    },
+    "nsis": {
+      "allowToChangeInstallationDirectory": true,
+      "oneClick": true
+    }
+  }
+}
