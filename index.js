@@ -208,7 +208,7 @@ var client = new Client('websocket')
 var mainWindow = null
 ipcMain.handle("add-file", (e, args) => client.addFile(args.title, args.path).then(result => result).catch(e => ({ error: true, message: e })))
 ipcMain.handle("open-file", (e, args) => client.getFile(args._id).then(result => {
-    shell.openItem(resolve(result.path));
+    shell.openItem(absolute(result.path));
     return true
 }).catch(e => ({ error: true, message: e })))
 ipcMain.handle("delete-file", (e, args) => client.deleteFile(args._id).then(result => result).catch(e => ({ error: true, message: e })))
